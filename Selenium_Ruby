@@ -1,0 +1,125 @@
+# Selenium tests on Ruby
+
+## Install
+
+gems:
+* gem 'capybara', '2.10.1'
+* gem 'selenium-webdriver', '3.0.3'
+
+
+## Selenium
+
+Install Selenium
+* https://pypi.python.org/pypi/selenium
+* https://developer.mozilla.org/en-US/docs/Mozilla/QA/Marionette/WebDriver
+
+
+## Selenium and Firefox
+
+We will use selenium-webdriver version '3.0.3' which needs Firefox version 50.0.2.
+
+!!! IMPORTANT!!! Check selenium gem version is compatible with Firefox version.
+
+* check compatibility:
+    * https://github.com/SeleniumHQ/selenium/blob/master/java/CHANGELOG
+    * https://github.com/santiycr/selenium-firefox-support-matrix
+
+* Install Firefox on Ubuntu
+Read: http://libre-software.net/how-to-install-firefox-on-ubuntu-linux-mint/
+
+
+* if needed install the older version of Firefox:
+   * https://support.mozilla.org/en-US/kb/install-older-version-of-firefox
+   
+   
+### Install geckodriver
+* https://github.com/mozilla/geckodriver
+
+* download
+
+change URL to download - find here: https://github.com/mozilla/geckodriver/releases
+
+```
+cd /tmp
+wget https://github.com/mozilla/geckodriver/releases/download/v0.11.1/geckodriver-v0.11.1-linux64.tar.gz
+```
+
+* unzip
+```
+tar -xvzf geckodriver-v0.11.1-linux64.tar.gz
+rm geckodriver-v0.11.1-linux64.tar.gz
+```
+
+* copy to bin directory
+
+```
+sudo mv geckodriver /usr/bin
+sudo chmod +x /usr/bin/geckodriver
+```
+
+
+
+# Test with Selenium-webdriver
+
+```
+require 'rubygems'
+require 'selenium-webdriver'
+
+driver = Selenium::WebDriver.for :firefox
+driver.manage.timeouts.implicit_wait = 10 # seconds
+
+driver.get "http://stackoverflow.com"
+
+puts "Page title is #{driver.title}"
+
+driver.quit
+```
+
+
+# Test with Capybara
+
+```
+require 'rubygems'
+require 'capybara'
+require 'capybara/dsl'
+
+Capybara.run_server = false
+Capybara.current_driver = :selenium
+Capybara.app_host = 'http://stackoverflow.com'
+#Capybara.server_port = 3000
+
+module MyCapybaraTest
+  class Test
+    include Capybara::DSL
+    
+    def test
+      visit('http://stackoverflow.com')
+      
+      puts "Page title is #{page.title}"
+    end
+  end
+end
+
+
+
+t = MyCapybaraTest::Test.new
+t.test
+```
+
+
+
+# Headless test
+
+```
+require 'selenium-webdriver'
+require 'headless'
+
+
+headless = Headless.new(display: 99)
+headless.start
+
+driver = Selenium::WebDriver.for :firefox
+driver.navigate.to 'http://stackoverflow.com'
+puts driver.title
+
+headless.destroy
